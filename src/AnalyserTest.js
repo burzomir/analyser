@@ -5,6 +5,10 @@ class AnalyserTest extends HTMLElement {
     const content = document.createElement("div");
     content.innerText = "AnalyserTest";
     this._shadowRoot.appendChild(content);
+    setTimeout(() => {
+      const event = new CustomEvent("initialised", { bubbles: true });
+      this.dispatchEvent(event);
+    }, 3000);
   }
 }
 
