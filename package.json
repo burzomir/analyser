@@ -1,0 +1,17 @@
+{
+  "name": "analyser",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "elm-live ./src/Main.elm --start-page=index.html -- --output=./src/Main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "elm-format": "^0.8.5",
+    "elm-live": "^4.0.2"
+  }
+}
