@@ -1,5 +1,6 @@
 module Main exposing (..)
 
+import Array exposing (Array)
 import Browser
 import Html exposing (Html, div, node, text)
 import Html.Events exposing (on)
@@ -10,37 +11,44 @@ main =
     Browser.sandbox { init = init, update = update, view = view }
 
 
-type alias Model =
-    Bool
+type Model
+    = Loading
+    | Initialised (List Int)
 
 
 type Msg
-    = Initialised
+    = Initialise (List Int)
 
 
 init : Model
 init =
-    False
+    Loading
 
 
 update : Msg -> Model -> Model
 update msg _ =
     case msg of
-        Initialised ->
-            True
+        Initialise values ->
+            Initialised values
+
+
+decoder : D.Decoder (List Int)
+decoder =
+    D.field "detail" <| D.list D.int
 
 
 view : Model -> Html Msg
-view initialised =
+view model =
     div []
         [ text "Hello, World!"
-        , node "analyser-test" [ on "initialised" <| D.succeed Initialised ] []
+        , node "analyser-test" [ on "initialised" <| D.map Initialise decoder ] []
         , div []
             [ text <|
-                if initialised then
-                    "Intiialised!"
+                case model of
+                    Loading ->
+                        ""
 
-                else
-                    ""
+                    Initialised values ->
+                        "Initialised!" ++ (String.join " " <| List.map String.fromInt values)
             ]
         ]

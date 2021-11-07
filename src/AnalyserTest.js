@@ -5,11 +5,20 @@ class AnalyserTest extends HTMLElement {
     const content = document.createElement("div");
     content.innerText = "AnalyserTest";
     this._shadowRoot.appendChild(content);
-    setTimeout(() => {
-      const event = new CustomEvent("initialised", { bubbles: true });
+    this.emitEvent();
+  }
+
+  emitEvent() {
+    requestAnimationFrame(() => {
+      const detail = [...new Uint8Array([randomInt(), randomInt()])];
+      const event = new CustomEvent("initialised", { bubbles: true, detail });
       this.dispatchEvent(event);
-    }, 3000);
+      this.emitEvent();
+    });
   }
 }
 
+function randomInt() {
+  return Math.floor(Math.random() * 10000);
+}
 window.customElements.define("analyser-test", AnalyserTest);
