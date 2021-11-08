@@ -1,8 +1,8 @@
 module Main exposing (..)
 
-import Array exposing (Array)
 import Browser
 import Html exposing (Html, div, node, text)
+import Html.Attributes exposing (style)
 import Html.Events exposing (on)
 import Json.Decode as D
 
@@ -13,11 +13,11 @@ main =
 
 type Model
     = Loading
-    | Initialised (List Int)
+    | Initialised (List Float)
 
 
 type Msg
-    = Initialise (List Int)
+    = Initialise (List Float)
 
 
 init : Model
@@ -32,9 +32,9 @@ update msg _ =
             Initialised values
 
 
-decoder : D.Decoder (List Int)
+decoder : D.Decoder (List Float)
 decoder =
-    D.field "detail" <| D.list D.int
+    D.field "detail" <| D.list D.float
 
 
 view : Model -> Html Msg
@@ -42,13 +42,32 @@ view model =
     div []
         [ text "Hello, World!"
         , node "analyser-test" [ on "initialised" <| D.map Initialise decoder ] []
-        , div []
-            [ text <|
-                case model of
-                    Loading ->
-                        ""
+        , div [] <|
+            case model of
+                Initialised data ->
+                    [ visualisation data ]
 
-                    Initialised values ->
-                        "Initialised!" ++ (String.join " " <| List.map String.fromInt values)
-            ]
+                _ ->
+                    []
         ]
+
+
+visualisation : List Float -> Html Msg
+visualisation data =
+    div
+        [ style "display" "flex"
+        , style "height" "300px"
+        , style "align-items" "flex-end"
+        ]
+    <|
+        List.map bar data
+
+
+bar : Float -> Html Msg
+bar height =
+    div
+        [ style "height" <| String.fromFloat (height / 255 * 100)  ++ "%"
+        , style "flex" "1"
+        , style "background" "cornflowerblue"
+        ]
+        []
