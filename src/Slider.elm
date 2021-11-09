@@ -1,4 +1,4 @@
-module Slider exposing (..)
+module Slider exposing (slider)
 
 import Browser
 import Html exposing (Html, div, input, node, text)
@@ -19,14 +19,10 @@ type Msg
 
 
 update : Msg -> Model -> Model
-update msg ( ov1, ov2 ) =
+update msg _ =
     case msg of
-        SetValue ( v1, v2 ) ->
-            if v1 >= v2 then
-                ( ov1, ov2 )
-
-            else
-                ( v1, v2 )
+        SetValue range ->
+            range
 
 
 view : Model -> Html Msg
@@ -44,8 +40,30 @@ slider min max ( v1, v2 ) onChange =
     div [ class "slider" ]
         [ sliderStyles
         , track v1 v2
-        , knob min max v1 (\v -> onChange ( v, v2 ))
-        , knob min max v2 (\v -> onChange ( v1, v ))
+        , knob min
+            max
+            v1
+            (\v ->
+                onChange
+                    (if v >= v2 then
+                        ( v1, v2 )
+
+                     else
+                        ( v, v2 )
+                    )
+            )
+        , knob min
+            max
+            v2
+            (\v ->
+                onChange
+                    (if v1 >= v then
+                        ( v1, v2 )
+
+                     else
+                        ( v1, v )
+                    )
+            )
         ]
 
 
