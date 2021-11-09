@@ -1,8 +1,8 @@
 module Slider exposing (..)
 
 import Browser
-import Html exposing (Attribute, Html, div, input, node, text)
-import Html.Attributes as A exposing (attribute, class, style, type_, value)
+import Html exposing (Html, div, input, node, text)
+import Html.Attributes as A exposing (class, style, type_, value)
 import Html.Events exposing (onInput)
 
 
@@ -39,18 +39,22 @@ view ( v1, v2 ) =
             , style "left" <| String.fromInt v1 ++ "%"
             ]
             []
-        , input (List.append sliderAttrs [ value <| String.fromInt v1, onInput (\v -> SetValue ( String.toInt v |> Maybe.withDefault 0, v2 )) ]) []
-        , input (List.append sliderAttrs [ value <| String.fromInt v2, onInput (\v -> SetValue ( v1, String.toInt v |> Maybe.withDefault 0 )) ]) []
+        , knob 0 100 v1 (\v -> SetValue ( v, v2 ))
+        , knob 0 100 v2 (\v -> SetValue ( v1, v ))
         ]
 
 
-sliderAttrs : List (Attribute msg)
-sliderAttrs =
-    [ A.min "0"
-    , A.max "100"
-    , type_ "range"
-    , class "slider"
-    ]
+knob : Int -> Int -> Int -> (Int -> msg) -> Html msg
+knob min max value onChange =
+    input
+        [ A.value <| String.fromInt value
+        , onInput (\v -> onChange <| Maybe.withDefault 0 <| String.toInt v)
+        , A.min <| String.fromInt min
+        , A.max <| String.fromInt max
+        , type_ "range"
+        , class "slider"
+        ]
+        []
 
 
 sliderStyles : Html msg
