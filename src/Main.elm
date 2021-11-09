@@ -6,6 +6,7 @@ import Html.Attributes exposing (property, style)
 import Html.Events exposing (on)
 import Json.Decode as D
 import Json.Encode as E
+import Slider exposing (slider)
 
 
 main =
@@ -19,6 +20,7 @@ type Model
 
 type Msg
     = Initialise (List Float)
+    | NoOp
 
 
 init : Model
@@ -27,10 +29,13 @@ init =
 
 
 update : Msg -> Model -> Model
-update msg _ =
+update msg model =
     case msg of
         Initialise values ->
             Initialised values
+
+        NoOp ->
+            model
 
 
 decoder : D.Decoder (List Float)
@@ -54,6 +59,7 @@ view model =
 
                 _ ->
                     []
+        , slider 0 512 ( 10, 100 ) (\_ -> NoOp)
         ]
 
 
