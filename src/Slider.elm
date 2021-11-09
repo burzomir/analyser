@@ -33,15 +33,20 @@ view : Model -> Html Msg
 view ( v1, v2 ) =
     div [ style "position" "relative", style "height" "20px" ]
         [ sliderStyles
-        , div
-            [ class "slider-track"
-            , style "width" <| (String.fromInt <| v2 - v1) ++ "%"
-            , style "left" <| String.fromInt v1 ++ "%"
-            ]
-            []
+        , track v1 v2
         , knob 0 100 v1 (\v -> SetValue ( v, v2 ))
         , knob 0 100 v2 (\v -> SetValue ( v1, v ))
         ]
+
+
+track : Int -> Int -> Html msg
+track v1 v2 =
+    div
+        [ class "slider-track"
+        , style "width" <| (String.fromInt <| v2 - v1) ++ "%"
+        , style "left" <| String.fromInt v1 ++ "%"
+        ]
+        []
 
 
 knob : Int -> Int -> Int -> (Int -> msg) -> Html msg
