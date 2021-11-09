@@ -1,4 +1,6 @@
 class AnalyserTest extends HTMLElement {
+  fftSize = 2048;
+
   constructor() {
     super();
     this._shadowRoot = this.attachShadow({ mode: "open" });
@@ -13,7 +15,7 @@ class AnalyserTest extends HTMLElement {
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
-    analyser.fftSize = 2048;
+    analyser.fftSize = this.fftSize;
     source.connect(analyser);
     this.analyser = analyser;
     this.buffer = new Uint8Array(analyser.frequencyBinCount);
