@@ -26,20 +26,15 @@ update msg _ =
 
 
 view : Model -> Html Msg
-view ( v1, v2 ) =
-    div [ class "slider" ]
-        [ sliderStyles
-        , track v1 v2
-        , knob 0 100 v1 (\v -> SetValue ( v, v2 ))
-        , knob 0 100 v2 (\v -> SetValue ( v1, v ))
-        ]
+view model =
+    slider 0 150 model SetValue
 
 
 slider : Int -> Int -> ( Int, Int ) -> (( Int, Int ) -> msg) -> Html msg
 slider min max ( v1, v2 ) onChange =
     div [ class "slider" ]
         [ sliderStyles
-        , track v1 v2
+        , track min max v1 v2
         , knob min
             max
             v1
@@ -67,14 +62,38 @@ slider min max ( v1, v2 ) onChange =
         ]
 
 
-track : Int -> Int -> Html msg
-track v1 v2 =
+track : Int -> Int -> Int -> Int -> Html msg
+track min max v1 v2 =
+    let
+        fmin =
+            toFloat min
+
+        fmax =
+            toFloat max
+
+        fv1 =
+            toFloat v1
+
+        fv2 =
+            toFloat v2
+
+        width =
+            normalize fmin fmax fv2 - normalize fmin fmax fv1
+
+        x =
+            normalize fmin fmax fv1
+    in
     div
         [ class "slider-track"
-        , style "width" <| (String.fromInt <| v2 - v1) ++ "%"
-        , style "left" <| String.fromInt v1 ++ "%"
+        , style "width" <| String.fromFloat width ++ "%"
+        , style "left" <| String.fromFloat x ++ "%"
         ]
         []
+
+
+normalize : Float -> Float -> Float -> Float
+normalize min max value =
+    (value - min) / (max - min) * 100
 
 
 knob : Int -> Int -> Int -> (Int -> msg) -> Html msg
