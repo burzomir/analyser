@@ -31,11 +31,21 @@ update msg ( ov1, ov2 ) =
 
 view : Model -> Html Msg
 view ( v1, v2 ) =
-    div [ style "position" "relative", style "height" "20px" ]
+    div [ class "slider" ]
         [ sliderStyles
         , track v1 v2
         , knob 0 100 v1 (\v -> SetValue ( v, v2 ))
         , knob 0 100 v2 (\v -> SetValue ( v1, v ))
+        ]
+
+
+slider : Int -> Int -> ( Int, Int ) -> (( Int, Int ) -> msg) -> Html msg
+slider min max ( v1, v2 ) onChange =
+    div [ class "slider" ]
+        [ sliderStyles
+        , track v1 v2
+        , knob min max v1 (\v -> onChange ( v, v2 ))
+        , knob min max v2 (\v -> onChange ( v1, v ))
         ]
 
 
@@ -57,7 +67,7 @@ knob min max value onChange =
         , A.min <| String.fromInt min
         , A.max <| String.fromInt max
         , type_ "range"
-        , class "slider"
+        , class "slider-knob"
         ]
         []
 
@@ -73,9 +83,14 @@ sliderStylesCss : String
 sliderStylesCss =
     """
 .slider {
+    position: relative;
+    height: 20px;
+}
+
+.slider-knob {
     -webkit-appearance: none;
     position: absolute;
-    top: 10px;
+    top: 0;
     right: 0;
     left: 0;
     bottom: 0;
@@ -83,27 +98,27 @@ sliderStylesCss =
     width: 100%;
     pointer-events: none;
     outline: none;
-    height: 10px;
+    height: 20px;
     background-color: transparent;
 }
-.slider::-webkit-slider-thumb {
+.slider-knob::-webkit-slider-thumb {
     -webkit-appearance: none;
     pointer-events: auto;
-    width: 15px;
-    height: 15px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     background: cornflowerblue;
 }
 
-.slider::-webkit-slider-runnable-track {
+.slider-knob::-webkit-slider-runnable-track {
     -webkit-appearance: none;
-    height: 10px;
+    height: 20px;
 }
 
 .slider-track {
     position: absolute;
-    top: 15px;
-    height: 5px;
+    top: 6px;
+    height: 8px;
     background: cornflowerblue; 
 }
 """
