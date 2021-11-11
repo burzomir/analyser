@@ -1,4 +1,4 @@
-module Slider exposing (slider)
+module Slider exposing (main, slider)
 
 import Browser
 import Html exposing (Html, div, input, node, text)
@@ -6,6 +6,7 @@ import Html.Attributes as A exposing (class, style, type_, value)
 import Html.Events exposing (onInput)
 
 
+main : Program () ( Int, Int ) Msg
 main =
     Browser.sandbox { init = ( 30, 70 ), update = update, view = view }
 
