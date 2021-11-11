@@ -1,11 +1,9 @@
 module Main exposing (..)
 
+import AnalyserNode exposing (analyserNode)
 import Browser
-import Html exposing (Html, div, node, text)
-import Html.Attributes exposing (property, style)
-import Html.Events exposing (on)
-import Json.Decode as D
-import Json.Encode as E
+import Html exposing (Html, div)
+import Html.Attributes exposing (style)
 import Slider exposing (slider)
 
 
@@ -37,19 +35,10 @@ update msg model =
             model
 
 
-decoder : D.Decoder (List Float)
-decoder =
-    D.field "detail" <| D.list D.float
-
-
 view : Model -> Html Msg
 view model =
     div []
-        [ node "analyser-node"
-            [ on "GotByteFrequencyData" <| D.map GotByteFrequencyData decoder
-            , property "fftSize" <| E.int 512
-            ]
-            []
+        [ analyserNode 512 GotByteFrequencyData
         , div [] [ visualisation model.byteFrequencyData ]
         , slider 0 512 ( 10, 100 ) (\_ -> NoOp)
         ]
