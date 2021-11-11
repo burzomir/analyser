@@ -1,12 +1,8 @@
-class AnalyserTest extends HTMLElement {
+class AnalyserNode extends HTMLElement {
   fftSize = 2048;
 
   constructor() {
     super();
-    this._shadowRoot = this.attachShadow({ mode: "open" });
-    const content = document.createElement("div");
-    content.innerText = "AnalyserTest";
-    this._shadowRoot.appendChild(content);
     this.start();
   }
 
@@ -27,7 +23,10 @@ class AnalyserTest extends HTMLElement {
     requestAnimationFrame(this.emitEvent);
     this.analyser.getByteFrequencyData(this.buffer);
     const detail = [...this.buffer];
-    const event = new CustomEvent("initialised", { bubbles: true, detail });
+    const event = new CustomEvent("GotByteFrequencyData", {
+      bubbles: true,
+      detail,
+    });
     this.dispatchEvent(event);
   }
 }
@@ -35,4 +34,4 @@ class AnalyserTest extends HTMLElement {
 function randomInt() {
   return Math.floor(Math.random() * 10000);
 }
-window.customElements.define("analyser-test", AnalyserTest);
+window.customElements.define("analyser-node", AnalyserNode);

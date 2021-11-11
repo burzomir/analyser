@@ -13,26 +13,25 @@ main =
     Browser.sandbox { init = init, update = update, view = view }
 
 
-type Model
-    = Loading
-    | Initialised (List Float)
+type alias Model =
+    { byteFrequencyData : List Float }
 
 
 type Msg
-    = Initialise (List Float)
+    = GotByteFrequencyData (List Float)
     | NoOp
 
 
 init : Model
 init =
-    Loading
+    { byteFrequencyData = [] }
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Initialise values ->
-            Initialised values
+        GotByteFrequencyData values ->
+            { model | byteFrequencyData = values }
 
         NoOp ->
             model
@@ -46,19 +45,12 @@ decoder =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hello, World!"
-        , node "analyser-test"
-            [ on "initialised" <| D.map Initialise decoder
+        [ node "analyser-node"
+            [ on "GotByteFrequencyData" <| D.map GotByteFrequencyData decoder
             , property "fftSize" <| E.int 512
             ]
             []
-        , div [] <|
-            case model of
-                Initialised data ->
-                    [ visualisation data ]
-
-                _ ->
-                    []
+        , div [] [ visualisation model.byteFrequencyData ]
         , slider 0 512 ( 10, 100 ) (\_ -> NoOp)
         ]
 
