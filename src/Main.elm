@@ -6,7 +6,6 @@ import Html exposing (Html, div)
 import Html.Attributes exposing (style)
 import List exposing (drop, length, take)
 import Slider exposing (slider)
-import Tuple exposing (first)
 
 
 main =
