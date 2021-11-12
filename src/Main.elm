@@ -4,8 +4,9 @@ import AnalyserNode exposing (analyserNode)
 import Browser
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
-import List exposing (length)
+import List exposing (drop, length, take)
 import Slider exposing (slider)
+import Tuple exposing (first)
 
 
 main =
@@ -57,7 +58,13 @@ view model =
         [ analyserNode model.fftSize GotByteFrequencyData
         , div [] [ visualisation model.byteFrequencyData ]
         , slider 0 (length model.byteFrequencyData) model.range SetRange
+        , div [] [ visualisation <| slice model.range model.byteFrequencyData ]
         ]
+
+
+slice : ( Int, Int ) -> List a -> List a
+slice ( start, end ) list =
+    drop start list |> take (end - start)
 
 
 visualisation : List Float -> Html Msg
