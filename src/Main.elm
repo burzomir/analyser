@@ -12,17 +12,24 @@ main =
 
 
 type alias Model =
-    { byteFrequencyData : List Float }
+    { byteFrequencyData : List Float
+    , range : ( Int, Int )
+    , fftSize : Int
+    }
 
 
 type Msg
     = GotByteFrequencyData (List Float)
+    | SetRange ( Int, Int )
     | NoOp
 
 
 init : Model
 init =
-    { byteFrequencyData = [] }
+    { byteFrequencyData = []
+    , range = ( 0, 512 )
+    , fftSize = 512
+    }
 
 
 update : Msg -> Model -> Model
@@ -31,6 +38,9 @@ update msg model =
         GotByteFrequencyData values ->
             { model | byteFrequencyData = values }
 
+        SetRange range ->
+            { model | range = range }
+
         NoOp ->
             model
 
@@ -38,9 +48,9 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ analyserNode 512 GotByteFrequencyData
+        [ analyserNode model.fftSize GotByteFrequencyData
         , div [] [ visualisation model.byteFrequencyData ]
-        , slider 0 512 ( 10, 100 ) (\_ -> NoOp)
+        , slider 0 model.fftSize model.range SetRange
         ]
 
 
