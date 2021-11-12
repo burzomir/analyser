@@ -4,6 +4,7 @@ import AnalyserNode exposing (analyserNode)
 import Browser
 import Html exposing (Html, div)
 import Html.Attributes exposing (style)
+import List exposing (length)
 import Slider exposing (slider)
 
 
@@ -24,11 +25,16 @@ type Msg
     | NoOp
 
 
+defaultFFTSize : Int
+defaultFFTSize =
+    64
+
+
 init : Model
 init =
     { byteFrequencyData = []
-    , range = ( 0, 512 )
-    , fftSize = 512
+    , range = ( 0, defaultFFTSize // 2 )
+    , fftSize = defaultFFTSize
     }
 
 
@@ -50,7 +56,7 @@ view model =
     div []
         [ analyserNode model.fftSize GotByteFrequencyData
         , div [] [ visualisation model.byteFrequencyData ]
-        , slider 0 model.fftSize model.range SetRange
+        , slider 0 (length model.byteFrequencyData) model.range SetRange
         ]
 
 
