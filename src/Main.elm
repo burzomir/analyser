@@ -3,9 +3,9 @@ module Main exposing (..)
 import AnalyserNode exposing (analyserNode)
 import Browser
 import Html exposing (Html, div)
-import Html.Attributes exposing (style)
 import List exposing (drop, length, take)
 import Slider exposing (slider)
+import Visualisations.Bars exposing (bars)
 
 
 main =
@@ -55,33 +55,12 @@ view : Model -> Html Msg
 view model =
     div []
         [ analyserNode model.fftSize GotByteFrequencyData
-        , div [] [ visualisation model.byteFrequencyData ]
+        , div [] [ bars 0 255 model.byteFrequencyData ]
         , slider 0 (length model.byteFrequencyData) model.range SetRange
-        , div [] [ visualisation <| slice model.range model.byteFrequencyData ]
+        , div [] [ bars 0 255 <| slice model.range model.byteFrequencyData ]
         ]
 
 
 slice : ( Int, Int ) -> List a -> List a
 slice ( start, end ) list =
     drop start list |> take (end - start)
-
-
-visualisation : List Float -> Html Msg
-visualisation data =
-    div
-        [ style "display" "flex"
-        , style "height" "300px"
-        , style "align-items" "flex-end"
-        ]
-    <|
-        List.map bar data
-
-
-bar : Float -> Html Msg
-bar height =
-    div
-        [ style "height" <| String.fromFloat (height / 255 * 100) ++ "%"
-        , style "flex" "1"
-        , style "background" "cornflowerblue"
-        ]
-        []
