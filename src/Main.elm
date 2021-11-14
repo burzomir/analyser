@@ -4,32 +4,34 @@ import AnalyserNode exposing (analyserNode)
 import Browser
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import List exposing (drop, length, take)
-import Slider exposing (slider)
+import Pages.VisualisationForm as VF
+import Types.Range exposing (slice)
+import Types.Visualisation exposing (Visualisation)
 import Visualisations.Bars exposing (bars)
 
 
+main : Program () Model Msg
 main =
     Browser.sandbox { init = init, update = update, view = view }
 
 
 type alias Model =
     { byteFrequencyData : List Float
-    , range : ( Int, Int )
     , fftSize : Int
     , visualisations : List Visualisation
-    , visualisationCreator : Maybe Visualisation
+    , page : Page
     }
+
+
+type Page
+    = VisualisationList
+    | VisualisationForm VF.Model
 
 
 type Msg
     = GotByteFrequencyData (List Float)
-    | SetRange ( Int, Int )
-    | OpenVisualisationCreator
-    | CancelVisualisationCreator
-    | SetVisualisationName String
-    | SetVisualisationRange ( Int, Int )
-    | AddVisualisation Visualisation
+    | OpenVisualisationForm
+    | VisualisationFormMsg VF.Msg
     | NoOp
 
 
@@ -41,10 +43,9 @@ defaultFFTSize =
 init : Model
 init =
     { byteFrequencyData = []
-    , range = ( 0, defaultFFTSize // 2 )
     , fftSize = defaultFFTSize
     , visualisations = []
-    , visualisationCreator = Nothing
+    , page = VisualisationList
     }
 
 
@@ -54,28 +55,31 @@ update msg model =
         GotByteFrequencyData values ->
             { model | byteFrequencyData = values }
 
-        SetRange range ->
-            { model | range = range }
+        OpenVisualisationForm ->
+            { model | page = VisualisationForm <| VF.init model.byteFrequencyData }
 
-        OpenVisualisationCreator ->
-            { model
-                | visualisationCreator = Just { name = "", range = ( 0, length model.byteFrequencyData ) }
-            }
+        VisualisationFormMsg visualisationFormMsg ->
+            case model.page of
+                VisualisationForm visualisationFormModel ->
+                    let
+                        ( newModel, result ) =
+                            VF.update visualisationFormMsg visualisationFormModel
+                    in
+                    case result of
+                        VF.None ->
+                            { model | page = VisualisationForm newModel }
 
-        CancelVisualisationCreator ->
-            { model | visualisationCreator = Nothing }
+                        VF.Cancelled ->
+                            { model | page = VisualisationList }
 
-        SetVisualisationName name ->
-            { model | visualisationCreator = Maybe.map (\v -> { v | name = name }) model.visualisationCreator }
+                        VF.Created visualisation ->
+                            { model
+                                | visualisations = visualisation :: model.visualisations
+                                , page = VisualisationList
+                            }
 
-        SetVisualisationRange range ->
-            { model | visualisationCreator = Maybe.map (\v -> { v | range = range }) model.visualisationCreator }
-
-        AddVisualisation visualisation ->
-            { model
-                | visualisations = visualisation :: model.visualisations
-                , visualisationCreator = Nothing
-            }
+                _ ->
+                    model
 
         NoOp ->
             model
@@ -85,10 +89,21 @@ view : Model -> Html Msg
 view model =
     div []
         [ analyserNode model.fftSize GotByteFrequencyData
-        , div [] <| List.map (visualisationView model.byteFrequencyData) model.visualisations
-        , button [ onClick OpenVisualisationCreator ] [ text "Add visualisation" ]
-        , visualisationCreator model.byteFrequencyData model.visualisationCreator
+        , pageView model
         ]
+
+
+pageView : Model -> Html Msg
+pageView model =
+    case model.page of
+        VisualisationList ->
+            div []
+                [ div [] <| List.map (visualisationView model.byteFrequencyData) model.visualisations
+                , button [ onClick OpenVisualisationForm ] [ text "Add visualisation" ]
+                ]
+
+        VisualisationForm visualisationForm ->
+            div [] [ Html.map VisualisationFormMsg <| VF.view model.byteFrequencyData visualisationForm ]
 
 
 visualisationView : List Float -> Visualisation -> Html Msg
@@ -97,30 +112,3 @@ visualisationView data visualisation =
         [ text visualisation.name
         , div [] [ bars 0 255 <| slice visualisation.range data ]
         ]
-
-
-visualisationCreator : List Float -> Maybe Visualisation -> Html Msg
-visualisationCreator data maybeVisualisation =
-    let
-        visusalisationView visualisation =
-            div []
-                [ div [] [ bars 0 255 data ]
-                , slider 0 (length data) visualisation.range SetVisualisationRange
-                , div [] [ bars 0 255 <| slice visualisation.range data ]
-                , button [ onClick (AddVisualisation visualisation) ] [ text "Add" ]
-                , button [ onClick CancelVisualisationCreator ] [ text "Cancel" ]
-                ]
-    in
-    Maybe.map visusalisationView maybeVisualisation
-        |> Maybe.withDefault (div [] [])
-
-
-slice : ( Int, Int ) -> List a -> List a
-slice ( start, end ) list =
-    drop start list |> take (end - start)
-
-
-type alias Visualisation =
-    { name : String
-    , range : ( Int, Int )
-    }
