@@ -7,7 +7,10 @@ class AnalyserNode extends HTMLElement {
   }
 
   async start() {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getDisplayMedia({
+      audio: true,
+      video: true
+    });
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
     const analyser = ctx.createAnalyser();
