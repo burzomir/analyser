@@ -37,7 +37,7 @@ type Msg
 
 defaultFFTSize : Int
 defaultFFTSize =
-    1024
+    2048
 
 
 init : Model
