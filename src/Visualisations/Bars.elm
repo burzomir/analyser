@@ -25,6 +25,5 @@ bar minValue maxValue value =
         [ style "height" <| String.fromFloat normalizedValue ++ "%"
         , style "flex" "1"
         , style "background" "cornflowerblue"
-        , style "margin" "0 1px"
         ]
         []
