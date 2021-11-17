@@ -1,7 +1,7 @@
 module Pages.VisualisationForm exposing (Model, Msg, Result(..), init, update, view)
 
-import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (type_, value)
+import Html exposing (Html, button, datalist, div, input, text)
+import Html.Attributes exposing (style, type_, value)
 import Html.Events exposing (onClick, onInput)
 import List exposing (length)
 import Slider exposing (slider)
@@ -52,12 +52,30 @@ update msg model =
 
 view : FrequencyData -> Model -> Html Msg
 view data { name, range } =
+    let
+        dataInRange =
+            slice range data
+    in
     div []
         [ text "Visualisation Form"
         , input [ type_ "text", onInput SetName, value name ] []
         , bars 0 255 data
         , slider 0 (length data) range SetRange
-        , circle 0 255 (slice range data)
+        , div []
+            [ tile <| circle 0 255 dataInRange
+            , tile <| bars 0 255 dataInRange
+            ]
         , button [ onClick Create ] [ text "Create" ]
         , button [ onClick Cancel ] [ text "Cancel" ]
         ]
+
+
+tile : Html msg -> Html msg
+tile content =
+    div
+        [ style "width" "300px"
+        , style "height" "300px"
+        , style "display" "inline-block"
+        , style "margin" "0 1em"
+        ]
+        [ content ]
