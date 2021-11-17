@@ -1,5 +1,7 @@
 class AnalyserNode extends HTMLElement {
   fftSize = 2048;
+  minDecibels = -90;
+  maxDecibels = -10;
 
   constructor() {
     super();
@@ -9,7 +11,7 @@ class AnalyserNode extends HTMLElement {
   async start() {
     const stream = await navigator.mediaDevices.getDisplayMedia({
       audio: true,
-      video: true
+      video: true,
     });
     const ctx = new AudioContext();
     const source = ctx.createMediaStreamSource(stream);
@@ -24,6 +26,8 @@ class AnalyserNode extends HTMLElement {
 
   emitEvent() {
     requestAnimationFrame(this.emitEvent);
+    this.analyser.minDecibels = this.minDecibels;
+    this.analyser.maxDecibels = this.maxDecibels;
     this.analyser.getByteFrequencyData(this.buffer);
     const detail = [...this.buffer];
     const event = new CustomEvent("GotByteFrequencyData", {

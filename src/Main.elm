@@ -37,7 +37,7 @@ type Msg
 
 defaultFFTSize : Int
 defaultFFTSize =
-    512
+    1024
 
 
 init : Model
@@ -88,7 +88,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ analyserNode model.fftSize GotByteFrequencyData
+        [ analyserNode -110 0 model.fftSize GotByteFrequencyData
         , pageView model
         ]
 
