@@ -1,9 +1,9 @@
-module HorizontalZoomContainer exposing (..)
+module HorizontalZoomContainer exposing (horizontalZoomContainer)
 
 import Browser
-import Html exposing (Html, button, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (style)
-import Html.Events exposing (on, onClick)
+import Html.Events exposing (on)
 import Json.Decode as D
 
 
@@ -22,20 +22,12 @@ initialModel =
 
 
 type Msg
-    = Increment
-    | Decrement
-    | Zoom Float
+    = Zoom Float
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Increment ->
-            { model | count = model.count + 1 }
-
-        Decrement ->
-            { model | count = model.count - 1 }
-
         Zoom delta ->
             let
                 newWidth =
@@ -57,7 +49,8 @@ view model =
         width =
             String.fromFloat model.width ++ "%"
     in
-    container width
+    horizontalZoomContainer Zoom
+        width
         [ div [ style "display" "flex" ] <| List.repeat 10 tile ]
 
 
@@ -72,18 +65,18 @@ tile =
         []
 
 
-container : String -> List (Html Msg) -> Html Msg
-container width children =
+horizontalZoomContainer : (Float -> msg) -> String -> List (Html msg) -> Html msg
+horizontalZoomContainer onZoom width children =
     div
         [ style "overflowX" "scroll"
-        , on "wheel" wheelDecoder
+        , on "wheel" (wheelDecoder onZoom)
         ]
         [ div [ style "width" width ] children ]
 
 
-wheelDecoder : D.Decoder Msg
-wheelDecoder =
-    D.map Zoom
+wheelDecoder : (Float -> msg) -> D.Decoder msg
+wheelDecoder msg =
+    D.map msg
         (D.field "deltaY" D.float)
 
 
