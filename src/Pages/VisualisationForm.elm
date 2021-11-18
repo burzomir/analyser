@@ -1,5 +1,6 @@
 module Pages.VisualisationForm exposing (Model, Msg, Result(..), init, update, view)
 
+import HorizontalZoomContainer exposing (horizontalZoomContainer)
 import Html exposing (Html, button, datalist, div, input, text)
 import Html.Attributes exposing (style, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -13,12 +14,12 @@ import Visualisations.Circle exposing (circle)
 
 
 type alias Model =
-    Visualisation
+    { name : String, range : Range, width : Float }
 
 
 init : FrequencyData -> Model
 init data =
-    { name = "", range = full data }
+    { name = "", range = full data, width = 100 }
 
 
 type Msg
@@ -26,6 +27,7 @@ type Msg
     | SetRange Range
     | Create
     | Cancel
+    | Zoom Float
 
 
 type Result
@@ -44,14 +46,17 @@ update msg model =
             ( { model | range = range }, None )
 
         Create ->
-            ( model, Created model )
+            ( model, Created { name = model.name, range = model.range } )
 
         Cancel ->
             ( model, Cancelled )
 
+        Zoom delta ->
+            ( { model | width = model.width + delta }, None )
+
 
 view : FrequencyData -> Model -> Html Msg
-view data { name, range } =
+view data { name, range, width } =
     let
         dataInRange =
             slice range data
@@ -59,8 +64,11 @@ view data { name, range } =
     div []
         [ text "Visualisation Form"
         , input [ type_ "text", onInput SetName, value name ] []
-        , bars 0 255 data
-        , slider 0 (length data) range SetRange
+        , horizontalZoomContainer Zoom
+            (String.fromFloat width ++ "%")
+            [ bars 0 255 data
+            , slider 0 (length data) range SetRange
+            ]
         , div []
             [ tile <| circle 0 255 dataInRange
             , tile <| bars 0 255 dataInRange
