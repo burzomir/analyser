@@ -1,6 +1,6 @@
 module Visualisations.Bars exposing (bars)
 
-import Html exposing (Html, div)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (style)
 
 

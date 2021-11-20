@@ -2,8 +2,9 @@ module Main exposing (..)
 
 import AnalyserNode exposing (analyserNode)
 import Browser
-import Html exposing (Html, button, div, text)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, input, label, text)
+import Html.Attributes exposing (value, type_)
+import Html.Events exposing (onClick, onInput)
 import Pages.VisualisationForm as VF
 import Types.Range exposing (slice)
 import Types.Visualisation exposing (Visualisation)
@@ -17,9 +18,12 @@ main =
 
 type alias Model =
     { byteFrequencyData : List Float
+    , previousByteFrequencyData : List Float
+    , frameCount : Int
     , fftSize : Int
     , visualisations : List Visualisation
     , page : Page
+    , diffFrequency : Int
     }
 
 
@@ -32,20 +36,24 @@ type Msg
     = GotByteFrequencyData (List Float)
     | OpenVisualisationForm
     | VisualisationFormMsg VF.Msg
+    | SetDiffFrequency Int
     | NoOp
 
 
 defaultFFTSize : Int
 defaultFFTSize =
-    2048
+    512
 
 
 init : Model
 init =
     { byteFrequencyData = []
+    , previousByteFrequencyData = []
     , fftSize = defaultFFTSize
     , visualisations = []
-    , page = VisualisationList
+    , page = VisualisationForm <| VF.init []
+    , frameCount = 1
+    , diffFrequency = 10
     }
 
 
@@ -53,7 +61,16 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         GotByteFrequencyData values ->
-            { model | byteFrequencyData = values }
+            { model
+                | frameCount = model.frameCount + 1
+                , byteFrequencyData = values
+                , previousByteFrequencyData =
+                    if modBy model.frameCount model.diffFrequency == 0 then
+                        model.byteFrequencyData
+
+                    else
+                        model.previousByteFrequencyData
+            }
 
         OpenVisualisationForm ->
             { model | page = VisualisationForm <| VF.init model.byteFrequencyData }
@@ -81,6 +98,9 @@ update msg model =
                 _ ->
                     model
 
+        SetDiffFrequency diffFrequency ->
+            { model | diffFrequency = diffFrequency }
+
         NoOp ->
             model
 
@@ -103,7 +123,16 @@ pageView model =
                 ]
 
         VisualisationForm visualisationForm ->
-            div [] [ Html.map VisualisationFormMsg <| VF.view model.byteFrequencyData visualisationForm ]
+            div []
+                [ Html.map VisualisationFormMsg <| VF.view model.previousByteFrequencyData model.byteFrequencyData visualisationForm
+                , label [] [ text "Diff Frequency" ]
+                , input
+                    [ onInput <| \v -> String.toInt v |> Maybe.map SetDiffFrequency |> Maybe.withDefault (SetDiffFrequency 0)
+                    , value <| String.fromInt model.diffFrequency
+                    , type_ "number"
+                    ]
+                    []
+                ]
 
 
 visualisationView : List Float -> Visualisation -> Html Msg
