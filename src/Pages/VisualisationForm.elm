@@ -19,7 +19,7 @@ type alias Model =
 
 init : FrequencyData -> Model
 init data =
-    { name = "", range = full data, width = 100, divider = 1 }
+    { name = "", range = full data, width = 100, divider = 10 }
 
 
 type Msg
@@ -64,6 +64,9 @@ view previousData data { name, range, width, divider } =
     let
         dataInRange =
             slice range data
+
+        previousDataInRage =
+            slice range previousData
     in
     div []
         [ text "Visualisation Form"
@@ -71,22 +74,25 @@ view previousData data { name, range, width, divider } =
         , horizontalZoomContainer Zoom
             (String.fromFloat width ++ "%")
             [ bars 0 255 data
-            , bars 0 255 <|
-                List.map
-                    (\( a, b ) ->
-                        if a > b then
-                            (a - b) * (a - b) / divider
-
-                        else
-                            0
-                    )
-                <|
-                    zip data previousData
             , slider 0 (length data) range SetRange
             ]
         , div []
             [ tile <| circle 0 255 dataInRange
             , tile <| bars 0 255 dataInRange
+            , tile <| bars 0 560 <| List.map ((*) 2) dataInRange
+            , tile <|
+                bars 0 255 <|
+                    List.map
+                        (\( a, b ) ->
+                            if a > b then
+                                (a - b) * (a - b) / divider
+
+                            else
+                                0
+                        )
+                    <|
+                        zip dataInRange previousDataInRage
+            , tile <| bars 0 255 <| [ List.foldl (+) 0 dataInRange / (toFloat <| List.length dataInRange) ]
             ]
         , button [ onClick Create ] [ text "Create" ]
         , button [ onClick Cancel ] [ text "Cancel" ]
